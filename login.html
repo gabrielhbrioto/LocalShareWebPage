@@ -12,25 +12,62 @@
 <body>
   <div class="container">
     <h2>Login</h2>
-    <form action="/login" method="POST" id="login-form">
-        <input type="text" id="username" name="username" placeholder="Nome de usuário" required><br>
-        <input type="password" id="password" name="password" placeholder="Senha" required><br>
-        <input type="submit" value="Entrar">
-      </form>      
+    <form id="login-form">
+      <input type="text" id="username" name="username" placeholder="Nome de usuário" required><br>
+      <input type="password" id="password" name="password" placeholder="Senha" required><br>
+      <input type="submit" value="Entrar">
+    </form>      
     <a href="/cadastro.html">Inscreva-se</a>
   </div>
   <script>
+    let ws;
+
+    // Recupera a URL do WebSocket salva no localStorage
+    const wsUrl = localStorage.getItem('wsUrl');
+    if (!wsUrl) {
+      alert('URL do WebSocket não configurada. Redirecionando para a página inicial.');
+      window.location.href = '/index.html';
+    } else {
+      console.log('Conectando ao WebSocket:', wsUrl);
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket conectado');
+      };
+
+      ws.onmessage = (event) => {
+        console.log('Mensagem recebida da ESP32:', event.data);
+        if (event.data === 'Login bem-sucedido') {
+          // Redireciona para a página principal em caso de login bem-sucedido
+          window.location.href = '/main-page.html';
+        } else if (event.data === 'Login falhou') {
+          alert('Credenciais inválidas. Tente novamente.');
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erro no WebSocket:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket desconectado');
+      };
+    }
+
+    // Envia os dados de login ao WebSocket
     document.getElementById('login-form').addEventListener('submit', function(event) {
       event.preventDefault();
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
-      console.log('Usuário:', username);
-      console.log('Senha:', password);
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-      if(username == 'admin' && password == 'admin') {
-        window.location.href = '/main-page.html';
+      // Cria um objeto JSON para enviar à ESP32
+      const loginData = JSON.stringify({ type: 'login', username, password });
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(loginData);
+        console.log('Dados enviados ao WebSocket:', loginData);
       } else {
-        alert('Credenciais inválidas');
+        alert('Erro: WebSocket não conectado.');
       }
     });
   </script>

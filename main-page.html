@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,10 +11,51 @@
     select, input[type="file"] { margin: 10px; padding: 10px; }
   </style>
   <script>
+    let ws;
+
+    // Recupera a URL do WebSocket salva no localStorage
+    const wsUrl = localStorage.getItem('wsUrl');
+    if (!wsUrl) {
+      alert('URL do WebSocket não configurada. Redirecionando para a página inicial.');
+      window.location.href = '/index.html';
+    } else {
+      console.log('Conectando ao WebSocket:', wsUrl);
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket conectado');
+      };
+
+      ws.onmessage = (event) => {
+        console.log('Mensagem recebida da ESP32:', event.data);
+        // Tratar mensagens específicas do dashboard aqui
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erro no WebSocket:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket desconectado');
+        alert('Conexão perdida com a ESP32. Redirecionando para a página de login.');
+        window.location.href = '/login.html';
+      };
+    }
+
     function toggleSection(section) {
       document.getElementById('download-section').classList.remove('active');
       document.getElementById('upload-section').classList.remove('active');
       document.getElementById(section).classList.add('active');
+    }
+
+    // Enviar mensagens para a ESP32 a partir do dashboard
+    function enviarMensagem(msg) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(msg);
+        console.log('Mensagem enviada:', msg);
+      } else {
+        alert('Erro: WebSocket não conectado.');
+      }
     }
   </script>
 </head>
@@ -27,10 +67,11 @@
 
     <div id="download-section" class="section active">
       <h3>Download de Arquivos</h3>
-      <form action="/download" method="post">
+      <form onsubmit="event.preventDefault(); enviarMensagem('Solicitar download');">
         <label for="arquivo">Escolha um arquivo:</label>
         <select name="arquivo" id="arquivo">
-          %OPTIONS%
+          <option value="arquivo1">Arquivo 1</option>
+          <option value="arquivo2">Arquivo 2</option>
         </select><br>
         <input type="submit" value="Baixar">
       </form>
@@ -38,7 +79,7 @@
 
     <div id="upload-section" class="section">
       <h3>Upload de Arquivos</h3>
-      <form action="/upload" method="post" enctype="multipart/form-data">
+      <form onsubmit="event.preventDefault(); enviarMensagem('Solicitar upload');">
         <label for="file">Selecione um arquivo para enviar:</label>
         <input type="file" name="file" id="file"><br>
         <input type="submit" value="Enviar">

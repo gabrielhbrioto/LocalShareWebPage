@@ -11,48 +11,17 @@
     <input type="submit" value="Conectar">
   </form>
   <script>
-    let ws;
-
     document.getElementById('connection-form').addEventListener('submit', function(event) {
       event.preventDefault();
-      var ngroknurl = document.getElementById('ngroknurl').value;
-      var connurl = ngroknurl.replace(/^http/, 'ws') + '/ws';
-      console.log('URL digitada:', connurl);
-    
-      ws = new WebSocket(connurl);
+      const ngroknurl = document.getElementById('ngroknurl').value;
+      const connurl = ngroknurl.replace(/^http/, 'ws') + '/ws';
 
-      ws.onopen = () => {
-        document.getElementById('status').innerText = 'Status: Conectado';
-      };
-      
+      // Salva a URL do WebSocket no localStorage
+      localStorage.setItem('wsUrl', connurl);
+
+      // Redireciona para a página de login após salvar a URL
+      window.location.href = '/login.html';
     });
-
-    // document.getElementById('connect').addEventListener('click', () => {
-    //   // Substitua pelo IP da ESP32
-    //   ws = new WebSocket('ws://192.168.1.100/ws');
-
-    //   ws.onopen = () => {
-    //     document.getElementById('status').innerText = 'Status: Conectado';
-    //   };
-
-    //   ws.onmessage = (event) => {
-    //     const log = document.getElementById('log');
-    //     log.innerHTML += `<p>Mensagem recebida: ${event.data}</p>`;
-    //   };
-
-    //   ws.onclose = () => {
-    //     document.getElementById('status').innerText = 'Status: Desconectado';
-    //   };
-    // });
-
-    // document.getElementById('send').addEventListener('click', () => {
-    //   const message = document.getElementById('message').value;
-    //   if (ws && ws.readyState === WebSocket.OPEN) {
-    //     ws.send(message);
-    //   } else {
-    //     alert('WebSocket não conectado!');
-    //   }
-    // });
   </script>
 </body>
 </html>

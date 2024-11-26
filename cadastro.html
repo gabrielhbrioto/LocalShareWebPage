@@ -12,22 +12,65 @@
 <body>
   <div class="container">
     <h2>Cadastro</h2>
-    <form action="/register" method="post" id="register-form">
-        <input type="text" id="username" name="username" placeholder="Nome de usuário" required><br>
-        <input type="password" id="password" name="password" placeholder="Senha" required><br>
+    <form id="register-form">
+      <input type="text" id="username" name="username" placeholder="Nome de usuário" required><br>
+      <input type="password" id="password" name="password" placeholder="Senha" required><br>
       <input type="submit" value="Cadastrar">
     </form>
     <a href="/">Voltar para Login</a>
   </div>
   <script>
+    let ws;
+
+    // Recupera a URL do WebSocket salva no localStorage
+    const wsUrl = localStorage.getItem('wsUrl');
+    if (!wsUrl) {
+      alert('URL do WebSocket não configurada. Redirecionando para a página inicial.');
+      window.location.href = '/index.html';
+    } else {
+      console.log('Conectando ao WebSocket:', wsUrl);
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket conectado');
+      };
+
+      ws.onmessage = (event) => {
+        console.log('Mensagem recebida da ESP32:', event.data);
+
+        // Processar a resposta do cadastro
+        if (event.data === 'Cadastro bem-sucedido') {
+          alert('Cadastro realizado com sucesso!');
+          window.location.href = '/login.html'; // Redireciona para a página de login
+        } else if (event.data === 'Cadastro falhou') {
+          alert('Falha no cadastro. Tente outro nome de usuário.');
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('Erro no WebSocket:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket desconectado');
+      };
+    }
+
+    // Envia os dados de cadastro ao WebSocket
     document.getElementById('register-form').addEventListener('submit', function(event) {
       event.preventDefault();
-      var username = document.getElementById('username').value;
-      var password = document.getElementById('password').value;
-      console.log('Usuário:', username);
-      console.log('Senha:', password);
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
 
-      
+      // Cria um objeto JSON para enviar à ESP32
+      const registerData = JSON.stringify({ type: 'register', username, password });
+
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(registerData);
+        console.log('Dados enviados ao WebSocket:', registerData);
+      } else {
+        alert('Erro: WebSocket não conectado.');
+      }
     });
   </script>
 </body>
