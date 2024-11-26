@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .container { margin: auto; padding: 20px; width: 50%; }
+    .section { display: none; }
+    .active { display: block; }
+    button { padding: 10px 20px; margin: 5px; }
+    select, input[type="file"] { margin: 10px; padding: 10px; }
+  </style>
+  <script>
+    function toggleSection(section) {
+      document.getElementById('download-section').classList.remove('active');
+      document.getElementById('upload-section').classList.remove('active');
+      document.getElementById(section).classList.add('active');
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h2>Bem-vindo ao Dashboard!</h2>
+    <button onclick="toggleSection('download-section')">Download</button>
+    <button onclick="toggleSection('upload-section')">Upload</button>
+
+    <div id="download-section" class="section active">
+      <h3>Download de Arquivos</h3>
+      <form action="/download" method="post">
+        <label for="arquivo">Escolha um arquivo:</label>
+        <select name="arquivo" id="arquivo">
+          %OPTIONS%
+        </select><br>
+        <input type="submit" value="Baixar">
+      </form>
+    </div>
+
+    <div id="upload-section" class="section">
+      <h3>Upload de Arquivos</h3>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <label for="file">Selecione um arquivo para enviar:</label>
+        <input type="file" name="file" id="file"><br>
+        <input type="submit" value="Enviar">
+      </form>
+    </div>
+  </div>
+</body>
+</html>
