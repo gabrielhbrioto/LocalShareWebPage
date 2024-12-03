@@ -13,23 +13,23 @@
 
     <div id="download-section" class="section active">
       <h3>Download de Arquivos</h3>
-      <form onsubmit="event.preventDefault(); enviarMensagem('Solicitar download');">
+      <form onsubmit="event.preventDefault(); solicitarDownload();">
         <label for="arquivo">Escolha um arquivo:</label>
         <select name="arquivo" id="arquivo">
           <option value="arquivo1">Arquivo 1</option>
           <option value="arquivo2">Arquivo 2</option>
         </select><br>
         <input type="submit" value="Baixar">
-      </form>
+      </form>      
     </div>
 
     <div id="upload-section" class="section">
       <h3>Upload de Arquivos</h3>
-      <form onsubmit="event.preventDefault(); enviarMensagem('Solicitar upload');">
+      <form onsubmit="event.preventDefault(); enviarArquivo();">
         <label for="file">Selecione um arquivo para enviar:</label>
         <input type="file" name="file" id="file"><br>
         <input type="submit" value="Enviar">
-      </form>
+      </form>      
     </div>
   </div>
 </body>

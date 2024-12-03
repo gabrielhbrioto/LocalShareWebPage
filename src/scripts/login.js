@@ -12,28 +12,40 @@ if (!wsUrl) {
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-    console.log('WebSocket conectado');
+        console.log('WebSocket conectado');
     };
 
     ws.onmessage = (event) => {
-    console.log('Mensagem recebida da ESP32:', event.data);
-    if (event.data === 'Login bem-sucedido') {
-        
-        localStorage.setItem('username', username);
-        localStorage.setItem('password', password);
-        
-        window.location.href = '/main-page.html';
-    } else if (event.data === 'Login falhou') {
-        alert('Credenciais inválidas. Tente novamente.');
-    }
+        console.log('Mensagem recebida da ESP32:', event.data);
+
+        if (event.data.startsWith('Login bem-sucedido')) {
+            // Separa a mensagem recebida
+            const [status, arquivos] = event.data.split(':');
+            
+            // Salva o nome de usuário e senha no localStorage
+            localStorage.setItem('username', username);
+            localStorage.setItem('password', password);
+
+            // Salva a lista de arquivos no localStorage
+            if (arquivos) {
+                const listaArquivos = arquivos.split('|').filter(Boolean); // Filtra valores vazios
+                localStorage.setItem('fileList', JSON.stringify(listaArquivos));
+                console.log('Lista de arquivos recebida e salva:', listaArquivos);
+            }
+
+            // Redireciona para a próxima página
+            window.location.href = './main-page.html';
+        } else if (event.data === 'Login falhou') {
+            alert('Credenciais inválidas. Tente novamente.');
+        }
     };
 
     ws.onerror = (error) => {
-    console.error('Erro no WebSocket:', error);
+        console.error('Erro no WebSocket:', error);
     };
 
     ws.onclose = () => {
-    console.log('WebSocket desconectado');
+        console.log('WebSocket desconectado');
     };
 }
 
@@ -76,7 +88,7 @@ function encodeLoginData(username, password) {
     let offset = 0;
 
     // Adiciona o byte de comando
-    buffer[offset++] = 2; // Byte de comando igual a 1
+    buffer[offset++] = 2; // Byte de comando igual a 3
 
     // Adiciona o tamanho do username (1 byte)
     buffer[offset++] = usernameBytes.length;
@@ -103,14 +115,13 @@ document.getElementById('login-form').addEventListener('submit', function (event
     username = document.getElementById('username').value;
     password = document.getElementById('password').value;
 
-
     // Codifica os dados no formato binário descrito
     const encodedData = encodeLoginData(username, password);
 
     if (ws && ws.readyState === WebSocket.OPEN) {
-    ws.send(encodedData);
-    console.log('Dados enviados ao WebSocket:', encodedData);
+        ws.send(encodedData);
+        console.log('Dados enviados ao WebSocket:', encodedData);
     } else {
-    alert('Erro: WebSocket não conectado.');
+        alert('Erro: WebSocket não conectado.');
     }
 });

@@ -42,6 +42,9 @@ function encodeRegisterData(username, password) {
     
   // Preenche o buffer
   let offset = 0;
+
+  // Adiciona o byte de comando
+  buffer[offset++] = 3; // Byte de comando igual a 2
     
   // Adiciona o tamanho do username (1 byte)
   buffer[offset++] = usernameBytes.length;
